@@ -1,95 +1,94 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
 import styles from "./page.module.css";
 
+type inputType = {
+  first: number;
+  second: number;
+  sum: number;
+  id: number;
+};
+
 export default function Home() {
+  const [inputs, setInputs] = useState<inputType[]>([
+    {
+      first: 0,
+      second: 0,
+      sum: 0,
+      id: 1,
+    },
+  ]);
+  const [rowNum, setRowNum] = useState(1);
+
+  const handleAddRow = () => {
+    const newRowNum = rowNum + 1;
+    setRowNum(newRowNum);
+    let newRow = {
+      first: 0,
+      second: 0,
+      sum: 0,
+      id: newRowNum,
+    };
+    setInputs((prevState) => [...prevState, newRow]);
+  };
+
+  const handleChangeOne = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    id: number,
+    pos: string
+  ) => {
+    const val = parseInt(e.target.value);
+    const updatedInputs = inputs.map((row) => {
+      if (row.id === id) {
+        const newRow = { ...row };
+        if (pos === "first") newRow.first = val;
+        else if (pos === "second") newRow.second = val;
+        newRow.sum = newRow.first + newRow.second;
+        return newRow;
+      }
+      return row;
+    });
+    setInputs(updatedInputs);
+  };
+
+  const calculateVertical = (line: string) => {
+    let columnSum = 0;
+    for (let i = 0; i < inputs.length; i += 1) {
+      if (line === "first") {
+        columnSum += inputs[i].first;
+      } else if (line === "second") {
+        columnSum += inputs[i].second;
+      } else if (line === "sum") {
+        columnSum += inputs[i].sum;
+      }
+    }
+    return columnSum;
+  };
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div className={styles.conatiner}>
+      <button onClick={handleAddRow}>Add new row</button>
+      {inputs.map((row) => (
+        <div key={row.id}>
+          <input
+            type="number"
+            defaultValue={row.first}
+            onChange={(e) => handleChangeOne(e, row.id, "first")}
+          ></input>
+          <input
+            type="number"
+            defaultValue={row.second}
+            onChange={(e) => handleChangeOne(e, row.id, "second")}
+          ></input>
+          <input defaultValue={row.sum} value={row.sum}></input>
         </div>
+      ))}
+      <div>
+        <input defaultValue={calculateVertical("first")}></input>
+        <input defaultValue={calculateVertical("second")}></input>
+        <input defaultValue={calculateVertical("sum")}></input>
       </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+    </div>
   );
 }
